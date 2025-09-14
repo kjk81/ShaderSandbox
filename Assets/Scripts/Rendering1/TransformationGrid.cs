@@ -8,7 +8,8 @@ public class TransformationGrid : MonoBehaviour
 {
     public Transform prefab;
 
-    List<Transformation> transformations; 
+    List<Transformation> transformations;
+    Matrix4x4 transformation;
 
     public int gridResolution = 10;
 
@@ -17,6 +18,7 @@ public class TransformationGrid : MonoBehaviour
     void Awake()
     {
         transformations = new List<Transformation>();
+
         grid = new Transform[gridResolution * gridResolution * gridResolution]; // 10 x 10 x 10 if gridResolution = 10
         for (int i = 0, z = 0; z < gridResolution; z++) {
             for (int y = 0; y < gridResolution; y++) {
@@ -30,8 +32,7 @@ public class TransformationGrid : MonoBehaviour
 
     private void Update()
     {
-        // NOTE: Utilize the List variation of GetComponents when fetching frequently because it creates a new array each time when doing array version.
-        GetComponents<Transformation>(transformations); // gives reference to transformations to be filled with all components of the class Transformation
+        UpdateTransformation();
         for (int i = 0, x = 0; x < gridResolution; x++) {
             for (int y = 0; y < gridResolution; y++) {
                 for (int z = 0; z < gridResolution; z++, i++)
@@ -45,11 +46,19 @@ public class TransformationGrid : MonoBehaviour
     private Vector3 TransformPoint(int x, int y, int z) {
         Vector3 coordinates = GetCoordinates(x, y, z); // getting the coordinates converted from array indices to pos centered at origin
 
-        // loop through list
-        for (int i = 0; i < transformations.Count; i++) {
-            coordinates = transformations[i].Apply(coordinates); // apply each transformation sequentially to the coordinates
+        return transformation.MultiplyPoint(coordinates);
+    }
+
+    private void UpdateTransformation() {
+        GetComponents<Transformation>(transformations);
+        if (transformations.Count > 0)
+        {
+            transformation = transformations[0].Matrix;
+            for (int i = 1; i < transformations.Count; i++)
+            {
+                transformation = transformations[i].Matrix * transformation;
+            }
         }
-        return coordinates;
     }
 
     // instantiate Transform (which essentially copies the GameObject or whatever),

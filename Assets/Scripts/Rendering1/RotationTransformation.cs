@@ -12,8 +12,6 @@ public class RotationTransformation : Transformation
     {
         get
         {
-
-            
             // index 0 = x, index 1 = y, index 2 = z
             float[] rads = {
                 rotation.x * Mathf.Deg2Rad,
@@ -48,7 +46,6 @@ public class RotationTransformation : Transformation
                     -sin[0] * cos[1],
                     cos[0] * cos[1]
                 );
-
             return new Matrix4x4(xAxis, yAxis, zAxis, new Vector4(0f, 0f, 0f, 1f));
         }
     }
